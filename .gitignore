@@ -1,0 +1,18 @@
+# chezmoi gitignore
+
+# macOS
+.DS_Store
+
+# Symlinks (auto-generated)
+Brewfile
+
+# Temporary files
+*.swp
+*.swo
+*~
+
+# chezmoi state
+.chezmoi.yaml
+
+# Local overrides (if you want machine-specific configs not in git)
+*.local

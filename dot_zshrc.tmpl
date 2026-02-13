@@ -1,0 +1,502 @@
+{{ if .is_immutable -}}
+# ============================================================================
+# DISTROBOX AUTO-ENTRY (immutable OS — tooling lives in container)
+# Toggle: touch ~/.config/dotfiles/no-distrobox to disable, rm to re-enable
+# ============================================================================
+if [ -z "$CONTAINER_ID" ] && [ ! -f /run/.containerenv ] && [ -t 0 ] \
+   && [ ! -f "$HOME/.config/dotfiles/no-distrobox" ]; then
+  if command -v distrobox > /dev/null 2>&1; then
+    if distrobox list 2>/dev/null | grep -q "{{ .distrobox_container }}"; then
+      exec distrobox enter {{ .distrobox_container }}
+    else
+      echo "[dotfiles] Container '{{ .distrobox_container }}' not found."
+      echo "[dotfiles] Run: distrobox create --name {{ .distrobox_container }} --image registry.fedoraproject.org/fedora-toolbox:{{ .fedora_version }}"
+    fi
+  fi
+fi
+
+{{ end -}}
+# ============================================================================
+# OS-SPECIFIC CONFIGURATION
+# ============================================================================
+export HOMEBREW_PREFIX="{{ .homebrew_prefix }}"
+
+# Add Homebrew to PATH
+eval "$({{ .homebrew_prefix }}/bin/brew shellenv)"
+# ============================================================================
+# ZSH COMPLETION SYSTEM - Must be initialized first!
+# ============================================================================
+autoload -Uz compinit
+compinit
+
+# oh-my-posh - prompt theme engine
+# Theme: powerlevel10k_rainbow (shows git, k8s context, exit codes, etc.)
+eval "$(oh-my-posh init zsh --config $(brew --prefix oh-my-posh)/themes/powerlevel10k_rainbow.omp.json)"
+
+# Alternative themes (uncomment to try):
+# eval "$(oh-my-posh init zsh --config $(brew --prefix oh-my-posh)/themes/tokyo.omp.json)"
+# eval "$(oh-my-posh init zsh --config $(brew --prefix oh-my-posh)/themes/night-owl.omp.json)"
+# eval "$(oh-my-posh init zsh --config $(brew --prefix oh-my-posh)/themes/pure.omp.json)"
+# eval "$(oh-my-posh init zsh --config $(brew --prefix oh-my-posh)/themes/atomic.omp.json)"
+export PATH="$HOME/.local/bin:$PATH"
+
+# fzf - fuzzy finder
+# Set up key bindings (Ctrl+R for history, Ctrl+T for files, Alt+C for cd)
+source {{ .homebrew_prefix }}/opt/fzf/shell/key-bindings.zsh
+source {{ .homebrew_prefix }}/opt/fzf/shell/completion.zsh
+
+# fzf configuration
+export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
+export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window down:3:hidden:wrap --bind '?:toggle-preview'"
+export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :500 {}' --preview-window right:60%:wrap"
+export FZF_ALT_C_OPTS="--preview 'tree -C {} | head -200'"
+
+# zoxide - smarter cd command
+eval "$(zoxide init zsh)"
+
+# direnv - auto-load .envrc files
+eval "$(direnv hook zsh)"
+
+# ============================================================================
+# MODERN CLI TOOL REPLACEMENTS
+# ============================================================================
+
+# eza - Modern ls replacement
+alias ls='eza --icons --group-directories-first'
+alias ll='eza -l --icons --group-directories-first --git'
+alias la='eza -la --icons --group-directories-first --git'
+alias llt='ll -s modified -r'
+alias lt='eza --tree --level=2 --icons'
+alias lta='eza --tree --level=3 --icons -a'
+
+# bat - Modern cat with syntax highlighting
+alias cat='bat --paging=never'
+alias catp='bat'  # with paging
+
+# Modern tools: use directly (rg, fd, bat, duf, dust, btm, procs)
+# Don't alias over grep/find/ps/cat — different flag syntax breaks scripts
+
+# less with markdown support - uses glow for .md files
+less() {
+  if [[ "$1" == *.md ]] || [[ "$1" == *.markdown ]]; then
+    glow -p "$@"
+  else
+    command less "$@"
+  fi
+}
+
+# ============================================================================
+# KUBECTL ALIASES (Essential for CKA!)
+# ============================================================================
+
+# Basic kubectl
+alias k='kubectl'
+alias kx='kubectx'          # Switch context
+alias kn='kubens'           # Switch namespace
+
+# Get resources
+alias kg='kubectl get'
+alias kgp='kubectl get pods'
+alias kgd='kubectl get deployments'
+alias kgs='kubectl get services'
+alias kgn='kubectl get nodes'
+alias kgns='kubectl get namespaces'
+alias kgi='kubectl get ingress'
+alias kgcm='kubectl get configmap'
+alias kgsec='kubectl get secret'
+alias kgpvc='kubectl get pvc'
+
+# Get with output options
+alias kgpo='kubectl get pods -o wide'
+alias kgpj='kubectl get pods -o json'
+alias kgpy='kubectl get pods -o yaml'
+alias kgall='kubectl get all'
+
+# Describe
+alias kd='kubectl describe'
+alias kdp='kubectl describe pod'
+alias kdd='kubectl describe deployment'
+alias kds='kubectl describe service'
+alias kdn='kubectl describe node'
+
+# Logs
+alias kl='kubectl logs'
+alias klf='kubectl logs -f'
+alias klp='kubectl logs -p'  # previous pod logs
+
+# Exec
+alias kex='kubectl exec -it'
+
+# Apply/Delete
+alias ka='kubectl apply -f'
+alias kdel='kubectl delete'
+alias kdelp='kubectl delete pod'
+alias kdelf='kubectl delete -f'
+
+# Create resources (imperative)
+alias krun='kubectl run'
+alias kcreate='kubectl create'
+
+# Edit
+alias kedit='kubectl edit'
+
+# Context and config
+alias kctx='kubectl config current-context'
+alias kctxs='kubectl config get-contexts'
+alias kcc='kubectl config use-context'
+alias kns='kubectl config set-context --current --namespace'
+
+# Port forward
+alias kpf='kubectl port-forward'
+
+# Dry-run and output yaml (essential for CKA speed!)
+alias kdr='kubectl --dry-run=client -o yaml'
+
+# Watch (useful for monitoring)
+alias wkgp='watch kubectl get pods'
+alias wkg='watch kubectl get'
+
+# ============================================================================
+# KUBECTL FUNCTIONS (Advanced CKA workflows)
+# ============================================================================
+
+# Quick pod shell access
+ksh() {
+  if [ -z "$1" ]; then
+    local pod=$(kubectl get pods | fzf | awk '{print $1}')
+  else
+    local pod=$1
+  fi
+  kubectl exec -it $pod -- /bin/sh
+}
+
+# Quick pod bash access
+kbash() {
+  if [ -z "$1" ]; then
+    local pod=$(kubectl get pods | fzf | awk '{print $1}')
+  else
+    local pod=$1
+  fi
+  kubectl exec -it $pod -- /bin/bash
+}
+
+# Get pod logs with fzf
+klogs() {
+  local pod=$(kubectl get pods | fzf | awk '{print $1}')
+  if [ -n "$pod" ]; then
+    kubectl logs -f $pod
+  fi
+}
+
+# Describe pod with fzf
+kdesc() {
+  local pod=$(kubectl get pods | fzf | awk '{print $1}')
+  if [ -n "$pod" ]; then
+    kubectl describe pod $pod
+  fi
+}
+
+# Delete pod with fzf
+kdelpod() {
+  local pod=$(kubectl get pods | fzf | awk '{print $1}')
+  if [ -n "$pod" ]; then
+    kubectl delete pod $pod
+  fi
+}
+
+# Get pod YAML
+kpy() {
+  local pod=$(kubectl get pods | fzf | awk '{print $1}')
+  if [ -n "$pod" ]; then
+    kubectl get pod $pod -o yaml | bat -l yaml
+  fi
+}
+
+# ============================================================================
+# GIT ALIASES
+# ============================================================================
+
+alias g='git'
+alias ga='git add'
+alias gaa='git add -p'      # Interactive staging (safer than git add .)
+alias gc='git commit -m'
+alias gca='git commit --amend'
+alias gp='git push'
+alias gpl='git pull'
+alias gs='git status'
+alias gd='git diff'
+alias gdc='git diff --cached'
+alias gl='git log --oneline --graph --decorate'
+alias gla='git log --oneline --graph --decorate --all'
+alias gb='git branch'
+alias gco='git checkout'
+alias gcb='git checkout -b'
+alias gm='git merge'
+alias gr='git rebase'
+alias gri='git rebase -i'
+alias gst='git stash'
+alias gstp='git stash pop'
+alias gf='git fetch'
+alias grh='git reset --soft HEAD~1'  # Undo last commit, keep changes staged
+
+# lazygit - Terminal UI for git
+alias lg='lazygit'
+
+# ============================================================================
+# DOCKER ALIASES
+# ============================================================================
+
+alias d='docker'
+alias dc='docker compose'
+alias dps='docker ps'
+alias dpsa='docker ps -a'
+alias di='docker images'
+alias dv='docker volume ls'
+alias dn='docker network ls'
+alias drm='docker rm'
+alias drmi='docker rmi'
+alias dex='docker exec -it'
+alias dlog='docker logs -f'
+alias dstop='docker stop'
+alias dstart='docker start'
+
+# lazydocker - Terminal UI for docker
+alias ld='lazydocker'
+
+# ============================================================================
+# KUBERNETES TOOLS
+# ============================================================================
+
+alias k9='k9s'              # Kubernetes TUI
+
+# ============================================================================
+# SYSTEM ALIASES
+# ============================================================================
+
+# Navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'
+
+# Quick directory access
+alias home='cd ~'
+alias documents='cd ~/Documents'
+alias downloads='cd ~/Downloads'
+alias desktop='cd ~/Desktop'
+
+# Clear screen
+alias c='clear'
+alias cls='clear'
+
+# History
+alias h='history'
+alias hg='history | grep'
+
+# File operations
+alias cp='cp -i'            # Interactive
+alias mv='mv -i'            # Interactive
+alias rm='rm -i'            # Interactive
+alias mkdir='mkdir -pv'     # Create parent directories, verbose
+
+# Network
+alias ping='ping -c 5'      # Limit to 5 pings
+alias ports='lsof -i -P'    # Show open ports
+
+# Process management
+alias psg='command ps aux | command grep -v grep | command grep -i -e VSZ -e'
+{{- if .is_immutable }}
+
+# Distrobox auto-entry toggle
+alias distrobox-toggle='if [ -f ~/.config/dotfiles/no-distrobox ]; then rm ~/.config/dotfiles/no-distrobox && echo "Auto-entry enabled"; else mkdir -p ~/.config/dotfiles && touch ~/.config/dotfiles/no-distrobox && echo "Auto-entry disabled"; fi'
+{{- end }}
+
+
+# ============================================================================
+# DEVELOPMENT ALIASES
+# ============================================================================
+
+# Python
+alias python='python3'
+alias pip='pip3'
+alias venv='python3 -m venv'
+
+# Node/npm
+alias npmi='npm install'
+alias npmu='npm uninstall'
+alias npms='npm start'
+alias npmt='npm test'
+alias npmr='npm run'
+
+# Make
+alias m='make'
+
+# Terraform
+alias tf='terraform'
+alias tfi='terraform init'
+alias tfp='terraform plan'
+alias tfa='terraform apply'
+alias tfd='terraform destroy'
+
+# ============================================================================
+# EDITOR ALIASES
+# ============================================================================
+
+alias vim='nvim'
+alias vi='nvim'
+alias v='nvim'
+
+# Quick edit common files
+alias zshrc='nvim ~/.zshrc'
+alias vimrc='nvim ~/.config/nvim/init.vim'
+alias hosts='sudo nvim /etc/hosts'
+
+# ============================================================================
+# UTILITY FUNCTIONS
+# ============================================================================
+
+# Quick HTTP server
+serve() {
+  local port="${1:-8000}"
+  python3 -m http.server $port
+}
+
+# Extract archives
+extract() {
+  if [ -f $1 ] ; then
+    case $1 in
+      *.tar.bz2)   tar xjf $1     ;;
+      *.tar.gz)    tar xzf $1     ;;
+      *.bz2)       bunzip2 $1     ;;
+      *.rar)       unrar e $1     ;;
+      *.gz)        gunzip $1      ;;
+      *.tar)       tar xf $1      ;;
+      *.tbz2)      tar xjf $1     ;;
+      *.tgz)       tar xzf $1     ;;
+      *.zip)       unzip $1       ;;
+      *.Z)         uncompress $1  ;;
+      *.7z)        7z x $1        ;;
+      *)           echo "'$1' cannot be extracted via extract()" ;;
+    esac
+  else
+    echo "'$1' is not a valid file"
+  fi
+}
+
+# Create and enter directory
+mkcd() {
+  mkdir -p "$1" && cd "$1"
+}
+
+# Find file by name
+ff() {
+  fd --type f --hidden --exclude .git "$1"
+}
+
+# Find directory by name
+fd_dir() {
+  fd --type d --hidden --exclude .git "$1"
+}
+
+# Quick search in files
+search() {
+  rg --color=auto --heading --line-number "$1"
+}
+
+# ============================================================================
+# TOOL COMPLETIONS
+# ============================================================================
+
+# kubectl completion
+source <(kubectl completion zsh)
+compdef k=kubectl
+
+# helm completion
+source <(helm completion zsh)
+
+# gh completion
+eval "$(gh completion -s zsh)"
+
+# ============================================================================
+# EXPORTS
+# ============================================================================
+
+# Editor
+export EDITOR='nvim'
+export VISUAL='nvim'
+
+# Bat (cat replacement) theme
+export BAT_THEME="TwoDark"
+
+# ripgrep config
+export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
+
+# fzf default command (use fd instead of find)
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+
+# Less options
+export LESS='-R'
+
+# History settings
+export HISTSIZE=10000
+export SAVEHIST=10000
+export HISTFILE=~/.zsh_history
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_FIND_NO_DUPS
+setopt SHARE_HISTORY
+
+# ============================================================================
+# CKA SPECIFIC HELPERS
+# ============================================================================
+
+# Quick cluster info
+alias kinfo='kubectl cluster-info'
+alias kversion='kubectl version'
+alias knodes='kubectl get nodes -o wide'
+
+# Quick pod debugging
+alias kpodtest='kubectl run test-pod --image=busybox --restart=Never --rm -it -- /bin/sh'
+
+# Watch pod status
+alias kwatch='watch -n 1 kubectl get pods'
+
+# Get all resources in namespace
+alias kgetall='kubectl get all,cm,secret,ing,pvc'
+
+# Explain resources (CKA essential!)
+alias kexp='kubectl explain'
+alias kexpr='kubectl explain --recursive'
+
+# Quick context setup for CKA practice
+cka-ctx() {
+  echo "Current context: $(kubectl config current-context)"
+  echo "Current namespace: $(kubectl config view --minify --output 'jsonpath={..namespace}')"
+  echo ""
+  echo "Available contexts:"
+  kubectl config get-contexts
+}
+
+# ============================================================================
+# USEFUL FUNCTIONS FOR CKA
+# ============================================================================
+
+# Quickly switch to kind cluster context
+kind-ctx() {
+  local cluster="${1:-cka-lab}"
+  kubectl config use-context "kind-${cluster}"
+}
+
+# Create a practice namespace
+cka-ns() {
+  local ns="${1:-practice}"
+  kubectl create namespace $ns
+  kubectl config set-context --current --namespace=$ns
+  echo "Namespace '$ns' created and set as default"
+}
+
+# Clean up completed pods
+kcleanup() {
+  kubectl get pods --field-selector=status.phase==Succeeded -o name | xargs kubectl delete
+  kubectl get pods --field-selector=status.phase==Failed -o name | xargs kubectl delete
+}
+

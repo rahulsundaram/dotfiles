@@ -1,0 +1,340 @@
+{
+  // ========================================================================
+  // THEME & APPEARANCE
+  // ========================================================================
+  "workbench.colorTheme": "Tokyo Night",
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.startupEditor": "none",
+  "workbench.sideBar.location": "left",
+  "workbench.tree.indent": 16,
+  "workbench.editor.tabSizing": "shrink",
+  "workbench.editor.showTabs": "multiple",
+
+  // ========================================================================
+  // EDITOR
+  // ========================================================================
+  "editor.fontSize": 14,
+  "editor.fontFamily": "'MesloLGS NF', 'FiraCode Nerd Font', 'Fira Code', Menlo, Monaco, monospace",
+  "editor.fontLigatures": true,
+  "editor.lineNumbers": "relative",
+  "editor.minimap.enabled": false,
+  "editor.cursorBlinking": "solid",
+  "editor.cursorSurroundingLines": 8,
+  "editor.smoothScrolling": true,
+  "editor.renderWhitespace": "boundary",
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": "active",
+  "editor.linkedEditing": true,
+  "editor.wordWrap": "off",
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": true,
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": false,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit",
+    "source.fixAll": "explicit"
+  },
+  "editor.suggestSelection": "first",
+  "editor.acceptSuggestionOnCommitCharacter": false,
+  "editor.snippetSuggestions": "top",
+  "editor.stickyScroll.enabled": true,
+  "editor.inlayHints.enabled": "offUnlessPressed",
+  "editor.rulers": [88, 120],
+  "editor.scrollBeyondLastLine": false,
+
+  // ========================================================================
+  // VIM
+  // ========================================================================
+  "vim.enable": true,
+  "vim.leader": "<space>",
+  "vim.hlsearch": true,
+  "vim.incsearch": true,
+  "vim.ignorecase": true,
+  "vim.smartcase": true,
+  "vim.useSystemClipboard": true,
+  "vim.useCtrlKeys": true,
+  "vim.handleKeys": {
+    "<C-a>": false,
+    "<C-f>": false,
+    "<C-c>": false,
+    "<C-v>": false,
+    "<C-x>": false,
+    "<C-z>": false,
+    "<C-w>": false
+  },
+  "vim.normalModeKeyBindingsNonRecursive": [
+    // clear search highlight
+    { "before": ["<Esc>"], "commands": [":nohl"] },
+    // window navigation
+    { "before": ["<C-h>"], "commands": ["workbench.action.focusLeftGroup"] },
+    { "before": ["<C-j>"], "commands": ["workbench.action.focusBelowGroup"] },
+    { "before": ["<C-k>"], "commands": ["workbench.action.focusAboveGroup"] },
+    { "before": ["<C-l>"], "commands": ["workbench.action.focusRightGroup"] },
+    // buffer navigation
+    { "before": ["<S-h>"], "commands": ["workbench.action.previousEditor"] },
+    { "before": ["<S-l>"], "commands": ["workbench.action.nextEditor"] },
+    // centered scrolling
+    { "before": ["<C-d>"], "after": ["<C-d>", "z", "z"] },
+    { "before": ["<C-u>"], "after": ["<C-u>", "z", "z"] },
+    { "before": ["n"], "after": ["n", "z", "z", "z", "v"] },
+    { "before": ["N"], "after": ["N", "z", "z", "z", "v"] },
+    // leader mappings - file
+    { "before": ["<leader>", "w"], "commands": ["workbench.action.files.save"] },
+    { "before": ["<leader>", "q"], "commands": ["workbench.action.closeActiveEditor"] },
+    { "before": ["<leader>", "e"], "commands": ["workbench.action.toggleSidebarVisibility"] },
+    // leader mappings - find (telescope equivalents)
+    { "before": ["<leader>", "f", "f"], "commands": ["workbench.action.quickOpen"] },
+    { "before": ["<leader>", "f", "g"], "commands": ["workbench.action.findInFiles"] },
+    { "before": ["<leader>", "f", "b"], "commands": ["workbench.action.showAllEditors"] },
+    { "before": ["<leader>", "f", "s"], "commands": ["workbench.action.showAllSymbols"] },
+    { "before": ["<leader>", "f", "d"], "commands": ["workbench.actions.view.problems"] },
+    // leader mappings - code
+    { "before": ["<leader>", "c", "a"], "commands": ["editor.action.quickFix"] },
+    { "before": ["<leader>", "r", "n"], "commands": ["editor.action.rename"] },
+    { "before": ["<leader>", "F"], "commands": ["editor.action.formatDocument"] },
+    { "before": ["<leader>", "d"], "commands": ["editor.action.showHover"] },
+    // leader mappings - git
+    { "before": ["<leader>", "g", "g"], "commands": ["workbench.view.scm"] },
+    { "before": ["<leader>", "g", "b"], "commands": ["gitlens.toggleFileBlame"] },
+    { "before": ["<leader>", "g", "h"], "commands": ["git-graph.view"] },
+    // leader mappings - split
+    { "before": ["<leader>", "v"], "commands": ["workbench.action.splitEditorRight"] },
+    { "before": ["<leader>", "s"], "commands": ["workbench.action.splitEditorDown"] },
+    // diagnostics
+    { "before": ["]", "d"], "commands": ["editor.action.marker.next"] },
+    { "before": ["[", "d"], "commands": ["editor.action.marker.prev"] },
+    // go to definition etc
+    { "before": ["g", "d"], "commands": ["editor.action.revealDefinition"] },
+    { "before": ["g", "r"], "commands": ["editor.action.goToReferences"] },
+    { "before": ["g", "i"], "commands": ["editor.action.goToImplementation"] },
+    { "before": ["g", "t"], "commands": ["editor.action.goToTypeDefinition"] }
+  ],
+  "vim.visualModeKeyBindingsNonRecursive": [
+    // move lines
+    { "before": ["J"], "commands": ["editor.action.moveLinesDownAction"] },
+    { "before": ["K"], "commands": ["editor.action.moveLinesUpAction"] },
+    // paste without losing register
+    { "before": ["<leader>", "p"], "after": ["\"", "_", "d", "P"] },
+    // stay in visual mode after indent
+    { "before": [">"], "commands": ["editor.action.indentLines"] },
+    { "before": ["<"], "commands": ["editor.action.outdentLines"] }
+  ],
+
+  // ========================================================================
+  // TERMINAL
+  // ========================================================================
+  "terminal.integrated.fontSize": 13,
+  "terminal.integrated.fontFamily": "'MesloLGS NF', 'FiraCode Nerd Font', monospace",
+  "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.integrated.defaultProfile.linux": "zsh",
+  "terminal.integrated.scrollback": 10000,
+  "terminal.integrated.copyOnSelection": true,
+
+  // ========================================================================
+  // FILE ASSOCIATIONS & EXCLUSIONS
+  // ========================================================================
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.autoSave": "onFocusChange",
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/node_modules": true,
+    "**/*.pyc": true
+  },
+  "files.associations": {
+    "*.yaml": "yaml",
+    "**/playbooks/**/*.yml": "ansible",
+    "**/roles/**/*.yml": "ansible",
+    "**/tasks/**/*.yml": "ansible",
+    "**/handlers/**/*.yml": "ansible",
+    "**/vars/**/*.yml": "ansible",
+    "**/defaults/**/*.yml": "ansible",
+    "**/group_vars/**/*.yml": "ansible",
+    "**/host_vars/**/*.yml": "ansible",
+    "ansible.cfg": "ini",
+    "inventory": "ini",
+    "**/inventory/**": "ini",
+    "*.j2": "jinja",
+    "Dockerfile*": "dockerfile",
+    "*.hcl": "terraform",
+    "*.tf": "terraform"
+  },
+
+  // ========================================================================
+  // PYTHON
+  // ========================================================================
+  "[python]": {
+    "editor.tabSize": 4,
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.rulers": [88],
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    }
+  },
+  "python.analysis.typeCheckingMode": "off",
+  "python.analysis.autoImportCompletions": true,
+  "ty.disableLanguageServices": true,
+
+  // ========================================================================
+  // GO
+  // ========================================================================
+  "[go]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": false,
+    "editor.defaultFormatter": "golang.go",
+    "editor.rulers": [120],
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "go.lintTool": "golangci-lint",
+  "go.lintOnSave": "package",
+  "go.formatTool": "gofumpt",
+  "go.useLanguageServer": true,
+  "gopls": {
+    "ui.semanticTokens": true,
+    "analyses": {
+      "unusedparams": true,
+      "shadow": true
+    },
+    "staticcheck": true
+  },
+
+  // ========================================================================
+  // BASH / SHELL
+  // ========================================================================
+  "[shellscript]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "foxundermoon.shell-format"
+  },
+
+  // ========================================================================
+  // ANSIBLE
+  // ========================================================================
+  "[ansible]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "redhat.ansible",
+    "editor.autoIndent": "advanced"
+  },
+  "ansible.validation.enabled": true,
+  "ansible.validation.lint.enabled": true,
+  "ansible.ansible.useFullyQualifiedCollectionNames": true,
+
+  // ========================================================================
+  // YAML / JSON / MARKDOWN
+  // ========================================================================
+  "[yaml]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  },
+  "[json]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[markdown]": {
+    "editor.wordWrap": "on",
+    "editor.rulers": []
+  },
+
+  // ========================================================================
+  // JAVASCRIPT / TYPESCRIPT
+  // ========================================================================
+  "[javascript]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // ========================================================================
+  // TERRAFORM
+  // ========================================================================
+  "[terraform]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "hashicorp.terraform",
+    "editor.formatOnSave": true
+  },
+
+  // ========================================================================
+  // DOCKERFILE
+  // ========================================================================
+  "[dockerfile]": {
+    "editor.tabSize": 4,
+    "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+  },
+
+  // ========================================================================
+  // KUBERNETES
+  // ========================================================================
+  "vs-kubernetes": {
+    "vs-kubernetes.kubectl-path": "",
+    "vs-kubernetes.helm-path": ""
+  },
+  "yaml.schemas": {
+    "kubernetes": ["**/k8s/**/*.yaml", "**/kubernetes/**/*.yaml", "**/manifests/**/*.yaml"]
+  },
+
+  // ========================================================================
+  // GIT & GITLENS
+  // ========================================================================
+  "git.autofetch": true,
+  "git.confirmSync": false,
+  "git.enableSmartCommit": true,
+  "gitlens.codeLens.enabled": false,
+  "gitlens.currentLine.enabled": true,
+  "gitlens.hovers.currentLine.over": "line",
+  "gitlens.statusBar.enabled": true,
+
+  // ========================================================================
+  // ERROR LENS
+  // ========================================================================
+  "errorLens.enabledDiagnosticLevels": ["error", "warning", "info"],
+  "errorLens.delay": 0,
+
+  // ========================================================================
+  // SPELLING
+  // ========================================================================
+  "cSpell.enableFiletypes": ["ansible", "terraform", "dockerfile"],
+  "cSpell.userWords": [
+    "kubectl", "kubeconfig", "kubelet", "kubeadm", "kubens", "kubectx",
+    "ansible", "playbook", "jinja",
+    "golang", "gofumpt", "gopls",
+    "pyright", "pylance", "ruff",
+    "chezmoi", "nvim", "tmux",
+    "autoscaling", "CIDR", "etcd"
+  ],
+
+  // ========================================================================
+  // REST CLIENT
+  // ========================================================================
+  "rest-client.environmentVariables": {
+    "$shared": {},
+    "local": {
+      "host": "http://localhost"
+    }
+  },
+
+  // ========================================================================
+  // EXPLORER & SEARCH
+  // ========================================================================
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/.git": true,
+    "**/__pycache__": true
+  }
+}

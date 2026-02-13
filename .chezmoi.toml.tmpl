@@ -1,0 +1,37 @@
+{{- $osid := .chezmoi.os -}}
+{{- if hasKey .chezmoi.osRelease "id" -}}
+{{-   $osid = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id -}}
+{{- end -}}
+
+{{- $isImmutable := false -}}
+{{- if eq .chezmoi.os "linux" -}}
+{{-   if lookPath "rpm-ostree" -}}
+{{-     $isImmutable = true -}}
+{{-   end -}}
+{{- end -}}
+
+[data]
+    osid = {{ $osid | quote }}
+    is_immutable = {{ $isImmutable }}
+    fedora_version = {{ if hasKey .chezmoi.osRelease "versionID" }}{{ .chezmoi.osRelease.versionID | quote }}{{ else }}""{{ end }}
+    distrobox_container = "dev"
+
+    {{- if eq .chezmoi.os "darwin" }}
+    # macOS specific
+    is_macos = true
+    is_linux = false
+    homebrew_prefix = "/opt/homebrew"
+    {{- else if eq .chezmoi.os "linux" }}
+    # Linux specific
+    is_macos = false
+    is_linux = true
+    homebrew_prefix = "/home/linuxbrew/.linuxbrew"
+    {{- end }}
+
+[git]
+    # Automatically stage changes when running chezmoi add/edit/apply
+    autoAdd = true
+    # Automatically commit after staging
+    autoCommit = true
+    # Automatically push after commit (requires remote configured)
+    autoPush = true

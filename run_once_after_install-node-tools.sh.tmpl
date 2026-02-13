@@ -1,0 +1,12 @@
+#!/bin/bash
+# Install Node.js-based language servers (runs once per machine)
+
+if ! command -v npm &>/dev/null; then
+  echo "npm not found, skipping Node tools install"
+  exit 0
+fi
+
+npm install -g bash-language-server@latest 2>/dev/null || echo "Failed: bash-language-server"
+npm install -g ansible-language-server@latest 2>/dev/null || echo "Failed: ansible-language-server"
+
+echo "Node tools installed"

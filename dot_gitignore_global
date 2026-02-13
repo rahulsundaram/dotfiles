@@ -1,0 +1,38 @@
+# Claude Code configuration files (local context only)
+CLAUDE.md
+**/CLAUDE.md
+
+# Except these tracked configurations
+!git/CLAUDE.md
+!git/training/CLAUDE.md
+
+# Claude Code session/project data
+.claude/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+.directory
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~.nib
+*.sublime-workspace
+
+# Temporary files
+*.tmp
+*.bak
+*.log

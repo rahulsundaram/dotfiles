@@ -1,0 +1,86 @@
+#!/bin/bash
+# Set up distrobox container with all dev tools (immutable OS only)
+{{ if not .is_immutable -}}
+exit 0
+{{ end -}}
+
+set -e
+
+CONTAINER="{{ .distrobox_container }}"
+IMAGE="registry.fedoraproject.org/fedora-toolbox:{{ .fedora_version }}"
+CHEZMOI_DIR="{{ .chezmoi.sourceDir }}"
+
+echo "Setting up distrobox container '$CONTAINER'..."
+
+# Create container if it doesn't exist
+if ! distrobox list 2>/dev/null | grep -q "$CONTAINER"; then
+  echo "Creating container '$CONTAINER' from $IMAGE..."
+  distrobox create --name "$CONTAINER" --image "$IMAGE" --yes
+else
+  echo "Container '$CONTAINER' already exists"
+fi
+
+# Helper: run a command inside the container
+dbox() {
+  distrobox enter -n "$CONTAINER" -- bash -l -c "$*"
+}
+
+# Helper: run a command inside the container with brew on PATH
+dbox_brew() {
+  distrobox enter -n "$CONTAINER" -- bash -l -c 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" && '"$*"
+}
+
+# Install build dependencies inside container
+echo "Installing build dependencies inside container..."
+dbox "sudo dnf groupinstall -y 'Development Tools'"
+dbox "sudo dnf install -y procps-ng curl file git zsh util-linux-user"
+
+# Install Linuxbrew inside container
+if ! dbox "test -d /home/linuxbrew/.linuxbrew"; then
+  echo "Installing Homebrew inside container..."
+  dbox 'NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
+else
+  echo "Homebrew already installed inside container"
+fi
+
+# Install all tools from Brewfile.linux
+echo "Installing tools from Brewfile.linux inside container..."
+dbox_brew "brew bundle --file=$CHEZMOI_DIR/Brewfile.linux"
+
+# Install Go tools inside container
+echo "Installing Go tools inside container..."
+GO_TOOLS=(
+  github.com/abice/go-enum@latest
+  github.com/air-verse/air@latest
+  github.com/cweill/gotests/gotests@latest
+  github.com/davidrjenni/reftools/cmd/fillstruct@latest
+  github.com/fatih/gomodifytags@latest
+  github.com/go-delve/delve/cmd/dlv@latest
+  github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+  github.com/josharian/impl@latest
+  github.com/koron/iferr@latest
+  github.com/kyoh86/richgo@latest
+  github.com/onsi/ginkgo/v2/ginkgo@latest
+  github.com/segmentio/golines@latest
+  golang.org/x/tools/cmd/goimports@latest
+  gotest.tools/gotestsum@latest
+  golang.org/x/vuln/cmd/govulncheck@latest
+  mvdan.cc/gofumpt@latest
+)
+
+for tool in "${GO_TOOLS[@]}"; do
+  echo "  Installing $tool"
+  dbox_brew "go install $tool" 2>/dev/null || echo "  Failed: $tool"
+done
+
+# Install Node tools inside container
+echo "Installing Node tools inside container..."
+dbox_brew "npm install -g bash-language-server@latest" 2>/dev/null || echo "  Failed: bash-language-server"
+dbox_brew "npm install -g ansible-language-server@latest" 2>/dev/null || echo "  Failed: ansible-language-server"
+
+# Set zsh as default shell inside container
+echo "Setting zsh as default shell inside container..."
+dbox 'sudo chsh -s $(which zsh) $(whoami)' 2>/dev/null || true
+
+echo "Distrobox container '$CONTAINER' setup complete!"
+echo "Open a new terminal to auto-enter the container."

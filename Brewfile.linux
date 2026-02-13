@@ -1,0 +1,57 @@
+# Brewfile for Linux (Linuxbrew)
+# Install with: brew bundle --file=~/.local/share/chezmoi/Brewfile
+#
+# Mirrors dot_Brewfile (macOS) minus casks, fonts, and macOS-only taps.
+# Keep in sync when adding new tools.
+
+tap "jandedobbeleer/oh-my-posh"
+
+brew "tree"
+brew "ansible"
+brew "ansible-lint"
+brew "bash"
+brew "bat"
+brew "bottom"
+brew "chezmoi"
+brew "direnv"
+brew "dive"
+brew "docker"
+brew "duf"
+brew "dust"
+brew "eza"
+brew "fd"
+brew "fzf"
+brew "gh"
+brew "git-delta"
+brew "glow"
+brew "go"
+brew "helm"
+brew "httpie"
+brew "jq"
+brew "k9s"
+brew "kind"
+brew "kubectx"
+brew "lazydocker"
+brew "lazygit"
+brew "neovim"
+brew "node"
+brew "pre-commit"
+brew "procs"
+brew "ripgrep"
+brew "ruff"
+brew "shellcheck"
+brew "ssh-copy-id"
+brew "stern"
+brew "tldr"
+brew "tmux"
+brew "ty"
+brew "uv"
+brew "watch"
+brew "yq"
+brew "zoxide"
+brew "jandedobbeleer/oh-my-posh/oh-my-posh"
+brew "kubernetes-cli"
+
+# Note: Nerd Fonts on Linux — install via your distro's package manager:
+# Fedora: sudo dnf copr enable che/nerd-fonts && sudo dnf install nerd-fonts
+# Ubuntu/Debian: download from https://github.com/ryanoasis/nerd-fonts/releases

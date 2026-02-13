@@ -1,0 +1,53 @@
+#!/bin/bash
+# Install VS Code extensions (runs once per machine)
+
+{{ if eq .chezmoi.os "darwin" -}}
+CODE="/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code"
+{{ else -}}
+CODE="code"
+{{ end -}}
+
+if ! command -v "$CODE" &>/dev/null && ! [ -x "$CODE" ]; then
+  echo "VS Code not found, skipping extension install"
+  exit 0
+fi
+
+extensions=(
+  vscodevim.vim
+  ms-python.python
+  ms-python.vscode-pylance
+  github.copilot
+  charliermarsh.ruff
+  astral-sh.ty
+  golang.go
+  timonwong.shellcheck
+  foxundermoon.shell-format
+  redhat.ansible
+  samuelcolvin.jinjahtml
+  ms-kubernetes-tools.vscode-kubernetes-tools
+  redhat.vscode-yaml
+  ms-azuretools.vscode-docker
+  hashicorp.terraform
+  eamodio.gitlens
+  mhutchie.git-graph
+  esbenp.prettier-vscode
+  dbaeumer.vscode-eslint
+  editorconfig.editorconfig
+  streetsidesoftware.code-spell-checker
+  usernamehw.errorlens
+  christian-kohler.path-intellisense
+  aaron-bond.better-comments
+  enkia.tokyo-night
+  pkief.material-icon-theme
+  oderwat.indent-rainbow
+  ms-vscode-remote.remote-ssh
+  ms-vscode-remote.remote-containers
+  humao.rest-client
+  ms-vscode.makefile-tools
+)
+
+for ext in "${extensions[@]}"; do
+  "$CODE" --install-extension "$ext" --force 2>/dev/null || true
+done
+
+echo "VS Code extensions installed"

@@ -1,0 +1,19 @@
+#!/bin/bash
+# Symlink VS Code settings on macOS (reads from ~/Library, not ~/.config)
+{{ if ne .chezmoi.os "darwin" -}}
+exit 0
+{{ end -}}
+
+set -e
+
+VSCODE_DIR="$HOME/Library/Application Support/Code/User"
+CONFIG_DIR="$HOME/.config/Code/User"
+
+mkdir -p "$VSCODE_DIR"
+
+for file in settings.json keybindings.json; do
+  if [ -f "$CONFIG_DIR/$file" ]; then
+    ln -sf "$CONFIG_DIR/$file" "$VSCODE_DIR/$file"
+    echo "Linked $CONFIG_DIR/$file -> $VSCODE_DIR/$file"
+  fi
+done

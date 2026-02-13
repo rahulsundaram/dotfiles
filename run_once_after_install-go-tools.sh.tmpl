@@ -1,0 +1,33 @@
+#!/bin/bash
+# Install Go development tools (runs once per machine)
+
+if ! command -v go &>/dev/null; then
+  echo "Go not found, skipping Go tools install"
+  exit 0
+fi
+
+tools=(
+  github.com/abice/go-enum@latest
+  github.com/air-verse/air@latest
+  github.com/cweill/gotests/gotests@latest
+  github.com/davidrjenni/reftools/cmd/fillstruct@latest
+  github.com/fatih/gomodifytags@latest
+  github.com/go-delve/delve/cmd/dlv@latest
+  github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+  github.com/josharian/impl@latest
+  github.com/koron/iferr@latest
+  github.com/kyoh86/richgo@latest
+  github.com/onsi/ginkgo/v2/ginkgo@latest
+  github.com/segmentio/golines@latest
+  golang.org/x/tools/cmd/goimports@latest
+  gotest.tools/gotestsum@latest
+  golang.org/x/vuln/cmd/govulncheck@latest
+  mvdan.cc/gofumpt@latest
+)
+
+for tool in "${tools[@]}"; do
+  echo "Installing $tool"
+  go install "$tool" 2>/dev/null || echo "  Failed: $tool"
+done
+
+echo "Go tools installed"

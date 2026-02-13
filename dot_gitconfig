@@ -1,0 +1,12 @@
+[core]
+	pager = delta
+	excludesfile = /Users/Rahul.Sundaram/.gitignore_global
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true
+	light = false
+	side-by-side = true
+[user]
+	name = Rahul Sundaram
+	email = rahulsundaram@users.noreply.github.com

@@ -1,0 +1,20 @@
+# Ripgrep config
+
+# Always use colors
+--color=auto
+
+# Search hidden files/directories but not .git
+--hidden
+--glob=!.git/
+
+# Show line numbers
+--line-number
+
+# Smart case: case-insensitive if all lowercase, case-sensitive otherwise
+--smart-case
+
+# Follow symlinks
+--follow
+
+# Use multiple threads
+--threads=4

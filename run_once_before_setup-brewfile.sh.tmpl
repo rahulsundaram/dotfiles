@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# This script runs once before chezmoi apply
+# It creates the appropriate Brewfile symlink based on OS
+
+set -e
+
+CHEZMOI_DIR="{{ .chezmoi.sourceDir }}"
+
+{{- if eq .chezmoi.os "darwin" }}
+# macOS — dot_Brewfile is the source of truth (brew bundle dump output)
+ln -sf "$CHEZMOI_DIR/dot_Brewfile" "$CHEZMOI_DIR/Brewfile"
+echo "Linked dot_Brewfile -> Brewfile"
+{{- else if eq .chezmoi.os "linux" }}
+# Linux — separate Brewfile without macOS casks/taps
+ln -sf "$CHEZMOI_DIR/Brewfile.linux" "$CHEZMOI_DIR/Brewfile"
+echo "Linked Brewfile.linux -> Brewfile"
+{{- end }}

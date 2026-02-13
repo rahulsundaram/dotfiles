@@ -1,0 +1,5 @@
+# Files that live in the chezmoi source directory only — do not deploy to HOME
+README.md
+install.sh
+Brewfile
+Brewfile.linux
